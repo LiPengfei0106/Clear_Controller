@@ -1,17 +1,21 @@
 package com.cleartv.controller;
 
-import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+
+import com.cleartv.controller.common.util.CommonUtils;
+import com.cleartv.controller.common.util.KeyEventUtil;
+import com.cleartv.controller.common.util.Logger;
+import com.cleartv.controller.common.util.PackageUtils;
+import com.cleartv.controller.common.util.ShellUtils;
+import com.cleartv.controller.common.util.SignUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import cn.jpush.android.api.JPushInterface;
@@ -30,36 +34,36 @@ public class MyReceiver extends BroadcastReceiver {
 	public void onReceive(final Context context, Intent intent) {
 		try {
 			Bundle bundle = intent.getExtras();
-			Log.d(TAG, "[MyReceiver] onReceive - " + intent.getAction() + ", extras: " + printBundle(bundle));
+			Logger.d(TAG, "[MyReceiver] onReceive - " + intent.getAction() + ", extras: " + printBundle(bundle));
 
 			if (JPushInterface.ACTION_REGISTRATION_ID.equals(intent.getAction())) {
 				String regId = bundle.getString(JPushInterface.EXTRA_REGISTRATION_ID);
-				Log.d(TAG, "[MyReceiver] 接收Registration Id : " + regId);
+				Logger.d(TAG, "[MyReceiver] 接收Registration Id : " + regId);
 				//send the Registration Id to your server...
 				
 			} else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent.getAction())) {
-				Log.d(TAG, "[MyReceiver] 接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));
+				Logger.d(TAG, "[MyReceiver] 接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));
 				String content = bundle.getString(JPushInterface.EXTRA_MESSAGE);
 				
 				HandleMsg(context,content);
 
 			} else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
-				Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
+				Logger.d(TAG, "[MyReceiver] 接收到推送下来的通知");
 				int notifactionId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);
-				Log.d(TAG, "[MyReceiver] 接收到推送下来的通知的ID: " + notifactionId);
+				Logger.d(TAG, "[MyReceiver] 接收到推送下来的通知的ID: " + notifactionId);
 
 			} else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
-				Log.d(TAG, "[MyReceiver] 用户点击打开了通知");
+				Logger.d(TAG, "[MyReceiver] 用户点击打开了通知");
 
 			} else if (JPushInterface.ACTION_RICHPUSH_CALLBACK.equals(intent.getAction())) {
-				Log.d(TAG, "[MyReceiver] 用户收到到RICH PUSH CALLBACK: " + bundle.getString(JPushInterface.EXTRA_EXTRA));
+				Logger.d(TAG, "[MyReceiver] 用户收到到RICH PUSH CALLBACK: " + bundle.getString(JPushInterface.EXTRA_EXTRA));
 				//在这里根据 JPushInterface.EXTRA_EXTRA 的内容处理代码，比如打开新的Activity， 打开一个网页等..
 
 			} else if(JPushInterface.ACTION_CONNECTION_CHANGE.equals(intent.getAction())) {
 				boolean connected = intent.getBooleanExtra(JPushInterface.EXTRA_CONNECTION_CHANGE, false);
-				Log.w(TAG, "[MyReceiver]" + intent.getAction() +" connected state change to "+connected);
+				Logger.w(TAG, "[MyReceiver]" + intent.getAction() +" connected state change to "+connected);
 			} else {
-				Log.d(TAG, "[MyReceiver] Unhandled intent - " + intent.getAction());
+				Logger.d(TAG, "[MyReceiver] Unhandled intent - " + intent.getAction());
 			}
 		} catch (Exception e){
 
@@ -67,8 +71,53 @@ public class MyReceiver extends BroadcastReceiver {
 
 	}
 
-	private void HandleMsg(Context context,String content) {
-		Intent broadcast = new Intent("controller");
+	private void HandleMsg(Context context, String content) {
+		try {
+			JSONObject object = new JSONObject(content);
+			if(object.has("package")){
+				String packageName = object.getString("package");
+				Logger.d(TAG,packageName+".CONTROLLER");
+				sendToOhterPackage(context,packageName,content);
+			}else if(object.has("packageName")){
+				String packageName = object.getString("packageName");
+				Logger.d(TAG,packageName+".CONTROLLER");
+				sendToOhterPackage(context,packageName,content);
+			}else if(object.has("action") && object.has("data")){
+				String action = object.getString("action");
+				JSONObject data = object.getJSONObject("data");
+				switch (action){
+					case "installApk":
+						int versionCode = data.getInt("versionCode");
+						String packageName = data.getString("packageName");
+						if(data.has("apkUrl")){
+							String apkUrl = data.getString("apkUrl");
+							if(!data.has("signMD5")){
+								CommonUtils.installApk(context,versionCode,packageName,apkUrl);
+							}else{
+								String signMD5 = data.getString("signMD5");
+								if(signMD5.equalsIgnoreCase(SignUtil.getSignMd5Str(context))){
+									CommonUtils.installApk(context,versionCode,packageName,apkUrl);
+								}
+							}
+						}else if(data.has("filePath")){
+							PackageUtils.installSilent(data.getString("filePath"));
+						}
+						break;
+					case "shell":
+						ShellUtils.execCommand(data.getString("command"),false,true);
+						break;
+					case "keyEvent":
+						KeyEventUtil.sendKeyUpDown(data.getInt("keyCode"));
+						break;
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void sendToOhterPackage(Context context, String packageName,String content){
+		Intent broadcast = new Intent(packageName+".CONTROLLER");
 		broadcast.putExtra("content",content);
 		context.sendBroadcast(broadcast);
 	}
@@ -83,11 +132,12 @@ public class MyReceiver extends BroadcastReceiver {
 				sb.append("\nkey:" + key + ", value:" + bundle.getBoolean(key));
 			} else if (key.equals(JPushInterface.EXTRA_EXTRA)) {
 				if (TextUtils.isEmpty(bundle.getString(JPushInterface.EXTRA_EXTRA))) {
-					Log.i(TAG, "This message has no Extra data");
+					Logger.i(TAG, "This message has no Extra data");
 					continue;
 				}
 
 				try {
+
 					JSONObject json = new JSONObject(bundle.getString(JPushInterface.EXTRA_EXTRA));
 					Iterator<String> it =  json.keys();
 
@@ -97,7 +147,7 @@ public class MyReceiver extends BroadcastReceiver {
 								myKey + " - " +json.optString(myKey) + "]");
 					}
 				} catch (JSONException e) {
-					Log.e(TAG, "Get message extra JSON error!");
+					Logger.e(TAG, "Get message extra JSON error!");
 				}
 
 			} else {

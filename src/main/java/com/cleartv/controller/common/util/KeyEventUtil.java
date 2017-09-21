@@ -1,4 +1,4 @@
-package com.cleartv.controller;
+package com.cleartv.controller.common.util;
 
 import android.app.Instrumentation;
 
@@ -6,7 +6,7 @@ import android.app.Instrumentation;
  * Created by Lee on 2017/9/6.
  */
 
-public class CommonUtils {
+public class KeyEventUtil {
 
     private static Instrumentation mInstrumentation;
 

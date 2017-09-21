@@ -1,4 +1,4 @@
-package com.cleartv.controller;
+package com.cleartv.controller.common.util;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -7,35 +7,46 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 /**
- * Created by Lee on 2017/9/4.
+ * ShellUtils
+ * <ul>
+ * <strong>Check root</strong>
+ * <li>{@link ShellUtils#checkRootPermission()}</li>
+ * </ul>
+ * <ul>
+ * <strong>Execte command</strong>
+ * <li>{@link ShellUtils#execCommand(String, boolean)}</li>
+ * <li>{@link ShellUtils#execCommand(String, boolean, boolean)}</li>
+ * <li>{@link ShellUtils#execCommand(List, boolean)}</li>
+ * <li>{@link ShellUtils#execCommand(List, boolean, boolean)}</li>
+ * <li>{@link ShellUtils#execCommand(String[], boolean)}</li>
+ * <li>{@link ShellUtils#execCommand(String[], boolean, boolean)}</li>
+ * </ul>
+ * 
+ * @author <a href="http://www.trinea.cn" target="_blank">Trinea</a> 2013-5-16
  */
-
 public class ShellUtils {
 
-    public static final String COMMAND_SU = "su";
-    public static final String COMMAND_SH = "sh";
-    public static final String COMMAND_EXIT = "exit\n";
+    public static final String COMMAND_SU       = "su";
+    public static final String COMMAND_SH       = "sh";
+    public static final String COMMAND_EXIT     = "exit\n";
     public static final String COMMAND_LINE_END = "\n";
-
 
     private ShellUtils() {
         throw new AssertionError();
     }
 
-
     /**
      * check whether has root permission
-     *
+     * 
      * @return
      */
     public static boolean checkRootPermission() {
         return execCommand("echo root", true, false).result == 0;
     }
 
-
     /**
      * execute shell command, default return result msg
-     *
+     * 
      * @param command command
      * @param isRoot whether need to run with root
      * @return
@@ -45,10 +56,9 @@ public class ShellUtils {
         return execCommand(new String[] {command}, isRoot, true);
     }
 
-
     /**
      * execute shell commands, default return result msg
-     *
+     * 
      * @param commands command list
      * @param isRoot whether need to run with root
      * @return
@@ -58,10 +68,9 @@ public class ShellUtils {
         return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, true);
     }
 
-
     /**
      * execute shell commands, default return result msg
-     *
+     * 
      * @param commands command array
      * @param isRoot whether need to run with root
      * @return
@@ -71,10 +80,9 @@ public class ShellUtils {
         return execCommand(commands, isRoot, true);
     }
 
-
     /**
      * execute shell command
-     *
+     * 
      * @param command command
      * @param isRoot whether need to run with root
      * @param isNeedResultMsg whether need result msg
@@ -85,10 +93,9 @@ public class ShellUtils {
         return execCommand(new String[] {command}, isRoot, isNeedResultMsg);
     }
 
-
     /**
      * execute shell commands
-     *
+     * 
      * @param commands command list
      * @param isRoot whether need to run with root
      * @param isNeedResultMsg whether need result msg
@@ -99,24 +106,17 @@ public class ShellUtils {
         return execCommand(commands == null ? null : commands.toArray(new String[] {}), isRoot, isNeedResultMsg);
     }
 
-
     /**
      * execute shell commands
-     *
+     * 
      * @param commands command array
      * @param isRoot whether need to run with root
      * @param isNeedResultMsg whether need result msg
-     * @return
-
-     *
-    if isNeedResultMsg is false, {@link CommandResult#successMsg} is null and
-     * {@link CommandResult#errorMsg} is null.
-
-     *
-    if {@link CommandResult#result} is -1, there maybe some excepiton.
-
-     *
-
+     * @return <ul>
+     *         <li>if isNeedResultMsg is false, {@link CommandResult#successMsg} is null and
+     *         {@link CommandResult#errorMsg} is null.</li>
+     *         <li>if {@link CommandResult#result} is -1, there maybe some excepiton.</li>
+     *         </ul>
      */
     public static CommandResult execCommand(String[] commands, boolean isRoot, boolean isNeedResultMsg) {
         int result = -1;
@@ -124,13 +124,11 @@ public class ShellUtils {
             return new CommandResult(result, null, null);
         }
 
-
         Process process = null;
         BufferedReader successResult = null;
         BufferedReader errorResult = null;
         StringBuilder successMsg = null;
         StringBuilder errorMsg = null;
-
 
         DataOutputStream os = null;
         try {
@@ -141,14 +139,13 @@ public class ShellUtils {
                     continue;
                 }
 
-            // donnot use os.writeBytes(commmand), avoid chinese charset error
+                // donnot use os.writeBytes(commmand), avoid chinese charset error
                 os.write(command.getBytes());
                 os.writeBytes(COMMAND_LINE_END);
                 os.flush();
             }
             os.writeBytes(COMMAND_EXIT);
             os.flush();
-
 
             result = process.waitFor();
             // get command result
@@ -165,6 +162,8 @@ public class ShellUtils {
                     errorMsg.append(s);
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -182,7 +181,6 @@ public class ShellUtils {
                 e.printStackTrace();
             }
 
-
             if (process != null) {
                 process.destroy();
             }
@@ -191,41 +189,29 @@ public class ShellUtils {
                 : errorMsg.toString());
     }
 
-
     /**
      * result of command
-     *
-
-     *
-     {@link CommandResult#result} means result of command, 0 means normal, else means error, same to excute in
-     * linux shell
-
-     *
-     {@link CommandResult#successMsg} means success message of command result
-
-     *
-     {@link CommandResult#errorMsg} means error message of command result
-
-     *
-
-     *
-     * @author Trinea 2013-5-16
+     * <ul>
+     * <li>{@link CommandResult#result} means result of command, 0 means normal, else means error, same to excute in
+     * linux shell</li>
+     * <li>{@link CommandResult#successMsg} means success message of command result</li>
+     * <li>{@link CommandResult#errorMsg} means error message of command result</li>
+     * </ul>
+     * 
+     * @author <a href="http://www.trinea.cn" target="_blank">Trinea</a> 2013-5-16
      */
     public static class CommandResult {
 
-
         /** result of command **/
-        public int result;
+        public int    result;
         /** success message of command result **/
         public String successMsg;
         /** error message of command result **/
         public String errorMsg;
 
-
         public CommandResult(int result) {
             this.result = result;
         }
-
 
         public CommandResult(int result, String successMsg, String errorMsg) {
             this.result = result;
@@ -233,5 +219,4 @@ public class ShellUtils {
             this.errorMsg = errorMsg;
         }
     }
-
 }

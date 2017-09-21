@@ -12,5 +12,15 @@ interface ControllerInterface {
 
     String getRegID();
 
+    void setAlias(String alias);
+
+    void setTags(in List<String> tags);
+
     void sendKeyUpDown(int keyCode);
+
+    void installSilent(String filePath);
+
+    void execCommand(String cmd);
+
+    void reboot();
 }
