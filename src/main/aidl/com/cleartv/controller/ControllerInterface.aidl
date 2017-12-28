@@ -23,4 +23,10 @@ interface ControllerInterface {
     void execCommand(String cmd);
 
     void reboot();
+
+    int getServerPort();
+
+    String getDeviceUid();
+
+    boolean isLocalServerAlive();
 }

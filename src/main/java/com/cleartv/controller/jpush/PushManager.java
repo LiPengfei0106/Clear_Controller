@@ -1,4 +1,4 @@
-package com.cleartv.controller;
+package com.cleartv.controller.jpush;
 
 import android.app.Application;
 import android.content.Intent;
@@ -37,7 +37,7 @@ public class PushManager {
 			return;
 		JPushInterface.resumePush(mContext);
 	}
-	
+
 	public static String getRegId(){
 		if(!hasRegister)
 			return null;
@@ -50,7 +50,7 @@ public class PushManager {
 //		JPushInterface.setAlias(mContext,0,alias);
 		JPushInterface.setAlias(mContext, alias, new TagAliasCallback() {
 			@Override
-			public void gotResult(int i, String s, Set<String> set) {
+			public void gotResult(int i, String s, Set set) {
 				Logger.i(TAG,"gotResult:"+i);
 				if(i == 0){
 					Intent broadcast = new Intent("com.cleartv.controller.CONTROLLER");
@@ -59,6 +59,17 @@ public class PushManager {
 				}
 			}
 		});
+//		JPushInterface.setAlias(mContext, alias, new TagAliasCallback() {
+//			@Override
+//			public void gotResult(int i, String s, Set<String> set) {
+//				Logger.i(TAG,"gotResult:"+i);
+//				if(i == 0){
+//					Intent broadcast = new Intent("com.cleartv.controller.CONTROLLER");
+//					broadcast.putExtra("alias",s);
+//					mContext.sendBroadcast(broadcast);
+//				}
+//			}
+//		});
 	}
 
 	public static void setTags(List<String> tags) {

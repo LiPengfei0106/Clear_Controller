@@ -1,4 +1,4 @@
-package com.cleartv.controller;
+package com.cleartv.controller.jpush;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,12 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
-import com.cleartv.controller.common.util.CommonUtils;
-import com.cleartv.controller.common.util.KeyEventUtil;
+import com.cleartv.controller.ControllerManager;
 import com.cleartv.controller.common.util.Logger;
-import com.cleartv.controller.common.util.PackageUtils;
-import com.cleartv.controller.common.util.ShellUtils;
-import com.cleartv.controller.common.util.SignUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,7 +41,7 @@ public class MyReceiver extends BroadcastReceiver {
 				Logger.d(TAG, "[MyReceiver] 接收到推送下来的自定义消息: " + bundle.getString(JPushInterface.EXTRA_MESSAGE));
 				String content = bundle.getString(JPushInterface.EXTRA_MESSAGE);
 				
-				HandleMsg(context,content);
+				ControllerManager.HandleMsg(content);
 
 			} else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
 				Logger.d(TAG, "[MyReceiver] 接收到推送下来的通知");
@@ -69,57 +65,6 @@ public class MyReceiver extends BroadcastReceiver {
 
 		}
 
-	}
-
-	private void HandleMsg(Context context, String content) {
-		try {
-			JSONObject object = new JSONObject(content);
-			if(object.has("package")){
-				String packageName = object.getString("package");
-				Logger.d(TAG,packageName+".CONTROLLER");
-				sendToOhterPackage(context,packageName,content);
-			}else if(object.has("packageName")){
-				String packageName = object.getString("packageName");
-				Logger.d(TAG,packageName+".CONTROLLER");
-				sendToOhterPackage(context,packageName,content);
-			}else if(object.has("action") && object.has("data")){
-				String action = object.getString("action");
-				JSONObject data = object.getJSONObject("data");
-				switch (action){
-					case "installApk":
-						int versionCode = data.getInt("versionCode");
-						String packageName = data.getString("packageName");
-						if(data.has("apkUrl")){
-							String apkUrl = data.getString("apkUrl");
-							if(!data.has("signMD5")){
-								CommonUtils.installApk(context,versionCode,packageName,apkUrl);
-							}else{
-								String signMD5 = data.getString("signMD5");
-								if(signMD5.equalsIgnoreCase(SignUtil.getSignMd5Str(context))){
-									CommonUtils.installApk(context,versionCode,packageName,apkUrl);
-								}
-							}
-						}else if(data.has("filePath")){
-							PackageUtils.installSilent(data.getString("filePath"));
-						}
-						break;
-					case "shell":
-						ShellUtils.execCommand(data.getString("command"),false,true);
-						break;
-					case "keyEvent":
-						KeyEventUtil.sendKeyUpDown(data.getInt("keyCode"));
-						break;
-				}
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void sendToOhterPackage(Context context, String packageName,String content){
-		Intent broadcast = new Intent(packageName+".CONTROLLER");
-		broadcast.putExtra("content",content);
-		context.sendBroadcast(broadcast);
 	}
 
 	// 打印所有的 intent extra 数据

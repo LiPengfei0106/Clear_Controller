@@ -9,6 +9,8 @@ import com.cleartv.controller.common.util.KeyEventUtil;
 import com.cleartv.controller.common.util.Logger;
 import com.cleartv.controller.common.util.PackageUtils;
 import com.cleartv.controller.common.util.ShellUtils;
+import com.cleartv.controller.jpush.PushManager;
+import com.cleartv.controller.localserver.ControllerServer;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class ControllerService extends Service {
     public IBinder onBind(Intent intent) {
         switch (intent.getPackage()){
             case "com.clearcrane.vod":
+                ControllerServer.getInstance().startWork();
                 return stub;
         }
         return null;
@@ -36,8 +39,17 @@ public class ControllerService extends Service {
         }
 
         @Override
+        public String getDeviceUid() throws RemoteException {
+            String deviceUid =  ControllerManager.getDeviceUid();
+            Logger.d(TAG,"getDeviceUid:"+deviceUid);
+            return deviceUid;
+        }
+
+        @Override
         public String getRegID() throws RemoteException {
-            return PushManager.getRegId();
+            String regid = PushManager.getRegId();
+            Logger.d(TAG,"getRegID:"+regid);
+            return regid;
         }
 
         @Override
@@ -80,6 +92,15 @@ public class ControllerService extends Service {
             sendBroadcast(i);
         }
 
+        @Override
+        public int getServerPort() throws RemoteException {
+            return ControllerServer.getInstance().getPort();
+        }
+
+        @Override
+        public boolean isLocalServerAlive() throws RemoteException {
+            return ControllerServer.getInstance().isAlive();
+        }
     };
 
 

@@ -1,4 +1,4 @@
-package com.cleartv.controller;
+package com.cleartv.controller.jpush;
 
 import android.content.Context;
 import android.content.Intent;
