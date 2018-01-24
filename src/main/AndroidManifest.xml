@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.cleartv.controller"
     android:sharedUserId="android.uid.system">
 
@@ -140,10 +141,35 @@
         <service
             android:name="cn.jpush.android.service.DownloadService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false">
 
-        <!-- Required SDK核心功能 -->
-        <receiver android:name="cn.jpush.android.service.AlarmReceiver" />
+        </service>
+
+        <!-- Required SDK核心功能-->
+        <receiver
+            android:name="cn.jpush.android.service.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- Required since JCore 1.1.7. SDK 核心功能-->
+        <provider
+            android:name="cn.jpush.android.service.DataProvider"
+            android:authorities="com.cleartv.controller.DataProvider"
+            tools:replace="android:exported"
+            android:exported="true" />
+
+        <!-- Required JMessage SDK核心功能-->
+        <receiver
+            android:name="cn.jpush.im.android.helpers.IMReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter android:priority="1000">
+                <action android:name="cn.jpush.im.android.action.IM_RESPONSE" />
+                <action android:name="cn.jpush.im.android.action.NOTIFICATION_CLICK_PROXY" />
+
+                <category android:name="com.cleartv.controller" />
+            </intent-filter>
+        </receiver>
+
 
         <!-- Required since 3.0.7 -->
         <!-- 新的tag/alias接口结果返回需要开发者配置一个自定的广播 -->
