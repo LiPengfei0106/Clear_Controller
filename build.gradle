@@ -39,6 +39,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile 'junit:junit:4.12'
+    compile 'com.alibaba:fastjson:1.2.40'
     compile 'cn.jiguang.sdk:jmessage:2.4.1'
     compile 'cn.jiguang.sdk:jpush:3.1.0'
     compile 'cn.jiguang.sdk:jcore:1.1.8'

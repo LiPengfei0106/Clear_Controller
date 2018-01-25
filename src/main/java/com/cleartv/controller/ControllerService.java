@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.cleartv.controller.JMessage.JMessageManager;
 import com.cleartv.controller.common.util.KeyEventUtil;
 import com.cleartv.controller.common.util.Logger;
 import com.cleartv.controller.common.util.PackageUtils;
@@ -23,7 +24,11 @@ public class ControllerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        switch (intent.getPackage()){
+        Logger.d(TAG, "bind");
+        if (intent.getPackage() == null) {
+            return null;
+        }
+        switch (intent.getPackage()) {
             case "com.clearcrane.vod":
                 ControllerServer.getInstance().startWork();
                 return stub;
@@ -40,51 +45,51 @@ public class ControllerService extends Service {
 
         @Override
         public String getDeviceUid() throws RemoteException {
-            String deviceUid =  ControllerManager.getDeviceUid();
-            Logger.d(TAG,"getDeviceUid:"+deviceUid);
+            String deviceUid = ControllerManager.getDeviceUid();
+            Logger.d(TAG, "getDeviceUid:" + deviceUid);
             return deviceUid;
         }
 
         @Override
         public String getRegID() throws RemoteException {
             String regid = PushManager.getRegId();
-            Logger.d(TAG,"getRegID:"+regid);
+            Logger.d(TAG, "getRegID:" + regid);
             return regid;
         }
 
         @Override
         public void setAlias(String alias) throws RemoteException {
-            Logger.d(TAG,"setAlias:"+alias);
+            Logger.d(TAG, "setAlias:" + alias);
             PushManager.setAlias(alias);
         }
 
         @Override
         public void setTags(List<String> tags) throws RemoteException {
-            Logger.d(TAG,"setTags");
+            Logger.d(TAG, "setTags");
             PushManager.setTags(tags);
         }
 
         @Override
         public void sendKeyUpDown(int keyCode) throws RemoteException {
-            Logger.d(TAG,"sendKeyUpDown:"+keyCode);
+            Logger.d(TAG, "sendKeyUpDown:" + keyCode);
             KeyEventUtil.sendKeyUpDown(keyCode);
         }
 
         @Override
         public void installSilent(String filePath) throws RemoteException {
-            Logger.d(TAG,"installSilent:"+filePath);
+            Logger.d(TAG, "installSilent:" + filePath);
             PackageUtils.installSilent(filePath);
         }
 
         @Override
         public void execCommand(String cmd) throws RemoteException {
-            Logger.d(TAG,"execCommand:"+cmd);
-            ShellUtils.execCommand(cmd,ShellUtils.checkRootPermission(),true);
+            Logger.d(TAG, "execCommand:" + cmd);
+            ShellUtils.execCommand(cmd, ShellUtils.checkRootPermission(), true);
         }
 
         @Override
         public void reboot() throws RemoteException {
-            Logger.d(TAG,"reboot");
+            Logger.d(TAG, "reboot");
             Intent i = new Intent(Intent.ACTION_REBOOT);
             i.putExtra("nowait", 1);
             i.putExtra("interval", 1);
@@ -100,6 +105,16 @@ public class ControllerService extends Service {
         @Override
         public boolean isLocalServerAlive() throws RemoteException {
             return ControllerServer.getInstance().isAlive();
+        }
+
+        @Override
+        public void notifyStatusChanged(String status) throws RemoteException {
+            JMessageManager.notifyStatusChanged(status);
+        }
+
+        @Override
+        public void createChatGroup(long id) throws RemoteException {
+            JMessageManager.createChatGroup(id);
         }
     };
 

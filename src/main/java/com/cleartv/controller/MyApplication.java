@@ -2,6 +2,7 @@ package com.cleartv.controller;
 
 import android.app.Application;
 
+import com.cleartv.controller.JMessage.JMessageManager;
 import com.cleartv.controller.jpush.PushManager;
 
 /**
@@ -16,5 +17,7 @@ public class MyApplication extends Application {
         super.onCreate();
         mApplication = this;
         PushManager.registerPush(this);
+
+        JMessageManager.init(this);
     }
 }

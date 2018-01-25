@@ -29,4 +29,9 @@ interface ControllerInterface {
     String getDeviceUid();
 
     boolean isLocalServerAlive();
+
+    // Vod中的操作通过此方法传递到Controller
+    void notifyStatusChanged(String status);
+
+    void createChatGroup(long id);
 }

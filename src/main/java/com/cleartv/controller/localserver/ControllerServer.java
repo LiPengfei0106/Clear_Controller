@@ -45,9 +45,11 @@ public class ControllerServer extends NanoHTTPD {
 	}
 
 	public void startWork() {
+		Logger.d(TAG, "startWork");
 		try {
-		    if(!isAlive())
-			    start();
+		    if(!isAlive()) {
+				start();
+			}
 		} catch (Exception e) {
 			Logger.e(TAG, "[" + e.getMessage() + "]");
 			mHandler.postDelayed(startRunnable, 1000);

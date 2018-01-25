@@ -3,6 +3,7 @@ package com.cleartv.controller.JMessage;
 import android.app.Application;
 
 import com.cleartv.controller.ControllerManager;
+import com.cleartv.controller.common.util.Logger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,11 +21,15 @@ import cn.jpush.im.api.BasicCallback;
 
 public class JMessageManager {
 
+    private static final String TAG = "JMessageManager";
+
+    private static Conversation sConversation; // 群聊Conversation
+    private static long sConversationId;// 群聊ID
+
     private static Conversation conversation;
     private static ChatRoomInfo chatRoomInfo;
 
     public static void init(Application application){
-
         JMessageClient.init(application);
 
         JMessageClient.register(ControllerManager.getDeviceUid(), "123456", new BasicCallback() {
@@ -64,7 +69,32 @@ public class JMessageManager {
 
     public static void setRoomInfo(String json){
 
-        
+    }
 
+    /**
+     * 创建聊天室
+     *
+     * @param id 聊天室id
+     */
+    public static void createChatGroup(long id) {
+        Logger.d(TAG, "创建聊天群 " + id);
+        sConversation = Conversation.createGroupConversation(id);
+        sConversationId = id;
+    }
+
+    /**
+     * vod那边有操作，需要更新状态
+     *
+     * @param statusJson 传递过来的Json
+     */
+    public static void notifyStatusChanged(String statusJson) {
+        Logger.d(TAG, "notify status: " + statusJson);
+        if (sConversation == null) {
+            return;
+        }
+        JMessageClient.enterGroupConversation(sConversationId);
+        JMessageClient.sendMessage(JMessageClient.createGroupTextMessage(
+                sConversationId, statusJson
+        ));
     }
 }

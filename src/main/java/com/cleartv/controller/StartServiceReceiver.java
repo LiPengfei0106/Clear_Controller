@@ -6,6 +6,9 @@ import android.content.Intent;
 
 import com.cleartv.controller.common.util.Logger;
 
+/**
+ * 开机自启入口
+ */
 public class StartServiceReceiver extends BroadcastReceiver {
 
     @Override

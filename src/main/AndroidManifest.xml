@@ -13,7 +13,7 @@
 
     <uses-permission android:name="com.cleartv.controller.permission.OPENVOD" />
 
-    <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER"/>
+    <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
 
     <!-- Required -->
     <uses-permission android:name="com.cleartv.controller.permission.JPUSH_MESSAGE" />
@@ -154,8 +154,8 @@
         <provider
             android:name="cn.jpush.android.service.DataProvider"
             android:authorities="com.cleartv.controller.DataProvider"
-            tools:replace="android:exported"
-            android:exported="true" />
+            android:exported="true"
+            tools:replace="android:exported" />
 
         <!-- Required JMessage SDK核心功能-->
         <receiver
@@ -210,9 +210,9 @@
             android:exported="true">
             <intent-filter>
 
-                <action android:name="com.cleartv.controller.intent.SHELL"/>
-                <action android:name="com.cleartv.controller.intent.KEYUPDOWN"/>
-                <action android:name="com.cleartv.controller.intent.INSTALLAPK"/>
+                <action android:name="com.cleartv.controller.intent.SHELL" />
+                <action android:name="com.cleartv.controller.intent.KEYUPDOWN" />
+                <action android:name="com.cleartv.controller.intent.INSTALLAPK" />
 
             </intent-filter>
 
