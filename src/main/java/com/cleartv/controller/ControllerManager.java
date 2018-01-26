@@ -1,21 +1,17 @@
 package com.cleartv.controller;
 
 import android.content.Intent;
-import android.os.RemoteException;
 
-import com.alibaba.fastjson.JSON;
 import com.cleartv.controller.common.util.CommonUtils;
 import com.cleartv.controller.common.util.KeyEventUtil;
 import com.cleartv.controller.common.util.Logger;
 import com.cleartv.controller.common.util.PackageUtils;
 import com.cleartv.controller.common.util.ShellUtils;
 import com.cleartv.controller.common.util.SignUtil;
-import com.cleartv.controller.entity.CurrentStatus;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import cn.jpush.im.android.api.JMessageClient;
 import cn.jpush.im.android.api.model.Conversation;
 
 /**

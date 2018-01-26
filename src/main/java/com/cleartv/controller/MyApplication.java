@@ -1,6 +1,7 @@
 package com.cleartv.controller;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.cleartv.controller.JMessage.JMessageManager;
 import com.cleartv.controller.jpush.PushManager;
@@ -10,14 +11,16 @@ import com.cleartv.controller.jpush.PushManager;
  */
 
 public class MyApplication extends Application {
-
+    private static final String TAG = "MyApplication";
     public static Application mApplication;
+
     @Override
     public void onCreate() {
         super.onCreate();
         mApplication = this;
         PushManager.registerPush(this);
 
+        Log.d(TAG, "onCreate");
         JMessageManager.init(this);
     }
 }

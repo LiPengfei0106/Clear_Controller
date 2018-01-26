@@ -109,12 +109,12 @@ public class ControllerService extends Service {
 
         @Override
         public void notifyStatusChanged(String status) throws RemoteException {
-            JMessageManager.notifyStatusChanged(status);
+            JMessageManager.get().notifyStatusChanged(status);
         }
 
         @Override
         public void createChatGroup(long id) throws RemoteException {
-            JMessageManager.createChatGroup(id);
+            JMessageManager.get().createChatGroup(id);
         }
     };
 
